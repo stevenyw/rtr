@@ -36,11 +36,8 @@ local function transformButton(buttonModel)
 	addConfigValue("BoolValue", "HideGUI", false)
 	addConfigValue("BoolValue", "SupportBalloons", true)
 	
-	local supportPlayers = addConfigValue("BoolValue", "SupportPlayers", not isPushBox)
-	if isPushBox then supportPlayers.Value = false end
-
+	addConfigValue("BoolValue", "SupportPlayers", not isPushBox)
 	addConfigValue("BoolValue", "SupportPushboxes", isPushBox)
-	
 	addConfigValue("BoolValue", "SupportTurrets", true)
 
 	local buttonPart = nil
@@ -58,7 +55,7 @@ local function transformButton(buttonModel)
 
 	local existingInvert = buttonModel:FindFirstChild("Invert")
 	if existingInvert and existingInvert:IsA("BoolValue") then
-		if buttonPart then
+		if buttonPart and existingInvert.Value == true then
 			local newInvert = Instance.new("BoolValue")
 			newInvert.Name = "Invert"
 			newInvert.Value = true

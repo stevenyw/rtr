@@ -1,43 +1,45 @@
--- retro pushboxbutton fixer!
+-- retro pushbox fixer!
 
 local Selection = game:GetService("Selection")
 
 local function transformButton(buttonModel)
-	if not buttonModel:IsA("Model") then return end
+	if not buttonModel:IsA("Model") or buttonModel.Name ~= "PushBoxButton" then return end
 
 	local config = buttonModel:FindFirstChild("Configurations") or Instance.new("Folder")
 	config.Name = "Configurations"
 	config.Parent = buttonModel
 
-	local timer = buttonModel:FindFirstChild("Timer")
-	if timer then timer.Parent = config end
-
-	local pressed = buttonModel:FindFirstChild("Pressed")
-	if pressed then pressed.Parent = config end
+	local toMove = {"Timer", "Pressed", "SupportBalloons", "SupportPlayers", "SupportPushboxes", "SupportTurrets", "ColorSpecific", "HideGUI"}
+	for _, name in ipairs(toMove) do
+		local val = buttonModel:FindFirstChild(name)
+		if val then val.Parent = config end
+	end
 
 	local clientObject = buttonModel:FindFirstChild("ClientObject")
 	if clientObject then clientObject:Destroy() end
 
-	local function addConfigValue(className, name, val)
+	local function addConfigValue(className, name, defaultVal)
 		local existing = config:FindFirstChild(name)
 		if not existing then
 			local obj = Instance.new(className)
 			obj.Name = name
-			obj.Value = val
+			obj.Value = defaultVal
 			obj.Parent = config
 			return obj
 		end
 		return existing
 	end
 
-	local isPushBox = (buttonModel.Name == "PushBoxButton")
-
 	addConfigValue("BoolValue", "ColorSpecific", false)
 	addConfigValue("BoolValue", "HideGUI", false)
 	addConfigValue("BoolValue", "SupportBalloons", true)
 	
-	addConfigValue("BoolValue", "SupportPlayers", not isPushBox)
-	addConfigValue("BoolValue", "SupportPushboxes", isPushBox)
+	local supportPlayers = addConfigValue("BoolValue", "SupportPlayers", false)
+	supportPlayers.Value = false
+
+	local supportPushboxes = addConfigValue("BoolValue", "SupportPushboxes", true)
+	supportPushboxes.Value = true
+    
 	addConfigValue("BoolValue", "SupportTurrets", true)
 
 	local buttonPart = nil
@@ -46,7 +48,7 @@ local function transformButton(buttonModel)
 			if child:FindFirstChild("Press") then
 				child.Name = "ButtonPart"
 				buttonPart = child
-				
+
 				local cos = child:FindFirstChild("ClientObjectScript")
 				if cos then cos:Destroy() end
 			end
@@ -55,16 +57,18 @@ local function transformButton(buttonModel)
 
 	local existingInvert = buttonModel:FindFirstChild("Invert")
 	if existingInvert and existingInvert:IsA("BoolValue") then
-		if buttonPart and existingInvert.Value == true then
-			local newInvert = Instance.new("BoolValue")
-			newInvert.Name = "Invert"
-			newInvert.Value = true
-			newInvert.Parent = buttonPart
+		if existingInvert.Value == true then
+			if buttonPart then
+				local newInvert = Instance.new("BoolValue")
+				newInvert.Name = "Invert"
+				newInvert.Value = true
+				newInvert.Parent = buttonPart
+			end
 		end
-		existingInvert:Destroy() 
+		existingInvert:Destroy()
 	end
 
-	local label = buttonModel:FindFirstChild("TimerLabel") 
+	local label = buttonModel:FindFirstChild("TimerLabel")
 	if not label then
 		label = Instance.new("TextLabel")
 		label.Name = "TimerLabel"
@@ -78,7 +82,7 @@ local function transformButton(buttonModel)
 	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	label.TextScaled = true
 	label.Font = Enum.Font.SourceSansBold
-	
+
 	if not label:FindFirstChild("DefaultColor") then
 		local dc = Instance.new("BoolValue")
 		dc.Name = "DefaultColor"
@@ -86,11 +90,9 @@ local function transformButton(buttonModel)
 		dc.Parent = label
 	end
 
-	if isPushBox then
-		buttonModel.Name = "Button"
-	end
+	buttonModel.Name = "Button"
 
-	print("Successfully transformed: " .. buttonModel.Name)
+	print("Successfully transformed PushBoxButton into: " .. buttonModel.Name)
 end
 
 for _, obj in ipairs(Selection:Get()) do

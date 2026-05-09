@@ -30,12 +30,15 @@ local function transformButton(buttonModel)
 		return existing
 	end
 
+	local isPushBox = (buttonModel.Name == "PushBoxButton")
+
 	addConfigValue("BoolValue", "ColorSpecific", false)
 	addConfigValue("BoolValue", "HideGUI", false)
 	addConfigValue("BoolValue", "SupportBalloons", true)
-	addConfigValue("BoolValue", "SupportPlayers", true)
 	
-	local isPushBox = (buttonModel.Name == "PushBoxButton")
+	local supportPlayers = addConfigValue("BoolValue", "SupportPlayers", not isPushBox)
+	if isPushBox then supportPlayers.Value = false end
+
 	addConfigValue("BoolValue", "SupportPushboxes", isPushBox)
 	
 	addConfigValue("BoolValue", "SupportTurrets", true)
@@ -84,6 +87,10 @@ local function transformButton(buttonModel)
 		dc.Name = "DefaultColor"
 		dc.Value = true
 		dc.Parent = label
+	end
+
+	if isPushBox then
+		buttonModel.Name = "Button"
 	end
 
 	print("Successfully transformed: " .. buttonModel.Name)

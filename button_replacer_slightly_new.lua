@@ -1,3 +1,5 @@
+-- for newer-ish buttons (stuff like v5.4 with the "supportX" boolvalues or whatever)
+
 local Selection = game:GetService("Selection")
 
 local function transformButton(buttonModel)

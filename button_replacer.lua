@@ -33,21 +33,24 @@ local function transformButton(buttonModel)
 		if descendant:IsA("BasePart") and descendant:FindFirstChildOfClass("Decal") then
 			descendant.Name = "ButtonPart"
 			descendant.Parent = buttonModel 
-			
+
 			local oldScript = descendant:FindFirstChild("ClientObjectScript")
 			if oldScript then oldScript:Destroy() end
-			
+
 			local doNotColor = descendant:FindFirstChild("DoNotColor")
 			if doNotColor then doNotColor:Destroy() end
 		end
 	end
 
-	-- TimerLabel Creation/Update Logic
-	local label = buttonModel:FindFirstChild("TimerLabel") or Instance.new("TextLabel")
-	label.Name = "TimerLabel"
+	-- TIMERLABEL LOGIC: Find existing or CREATE new if missing
+	local label = buttonModel:FindFirstChild("TimerLabel", true) 
+	if not label then
+		label = Instance.new("TextLabel")
+		label.Name = "TimerLabel"
+	end
 	label.Parent = buttonModel
-	
-	-- Apply Property Settings from Images
+
+	-- Set exact properties from your images
 	label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	label.BackgroundTransparency = 1
 	label.BorderSizePixel = 1
@@ -60,12 +63,12 @@ local function transformButton(buttonModel)
 	label.TextWrapped = true
 	label.Font = Enum.Font.SourceSansBold
 	label.Visible = true
-	
+
 	addBool(label, "DefaultColor", true)
-    
+
 	local invert = buttonModel:FindFirstChild("Invert")
 	if invert then invert:Destroy() end
-    
+
 	for _, child in ipairs(buttonModel:GetChildren()) do
 		if child:IsA("BasePart") and child.Name == "Part" and #child:GetChildren() == 0 then
 			child:Destroy()

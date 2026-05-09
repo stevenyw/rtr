@@ -13,6 +13,9 @@ local function transformButton(buttonModel)
 	local pressed = buttonModel:FindFirstChild("Pressed")
 	if pressed then pressed.Parent = config end
 
+	local clientObject = buttonModel:FindFirstChild("ClientObject")
+	if clientObject then clientObject:Destroy() end
+
 	local function addConfigValue(className, name, val)
 		local existing = config:FindFirstChild(name)
 		if not existing then

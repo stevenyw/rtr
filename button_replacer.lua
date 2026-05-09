@@ -1,5 +1,3 @@
--- PUT THIS IN THE COMMAND BAR AND HIGHLIGHT THE SPECIFIC BUTTON YOU WANT
-
 local Selection = game:GetService("Selection")
 
 local function transformButton(buttonModel)
@@ -15,21 +13,21 @@ local function transformButton(buttonModel)
 	local pressed = buttonModel:FindFirstChild("Pressed")
 	if pressed then pressed.Parent = config end
 
-	local function addBool(name, val)
-		if not config:FindFirstChild(name) then
+	local function addBool(parent, name, val)
+		if not parent:FindFirstChild(name) then
 			local b = Instance.new("BoolValue")
 			b.Name = name
 			b.Value = val
-			b.Parent = config
+			b.Parent = parent
 		end
 	end
 
-	addBool("ColorSpecific", false)
-	addBool("HideGUI", false)
-	addBool("SupportBalloons", true)
-	addBool("SupportPlayers", true)
-	addBool("SupportPushboxes", true)
-	addBool("SupportTurrets", true)
+	addBool(config, "ColorSpecific", false)
+	addBool(config, "HideGUI", false)
+	addBool(config, "SupportBalloons", true)
+	addBool(config, "SupportPlayers", true)
+	addBool(config, "SupportPushboxes", true)
+	addBool(config, "SupportTurrets", true)
 
 	for _, descendant in ipairs(buttonModel:GetDescendants()) do
 		if descendant:IsA("BasePart") and descendant:FindFirstChildOfClass("Decal") then
@@ -43,6 +41,27 @@ local function transformButton(buttonModel)
 			if doNotColor then doNotColor:Destroy() end
 		end
 	end
+
+	-- TimerLabel Creation/Update Logic
+	local label = buttonModel:FindFirstChild("TimerLabel") or Instance.new("TextLabel")
+	label.Name = "TimerLabel"
+	label.Parent = buttonModel
+	
+	-- Apply Property Settings from Images
+	label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	label.BackgroundTransparency = 1
+	label.BorderSizePixel = 1
+	label.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.Position = UDim2.new(0, 0, 0, 0)
+	label.Text = "Label"
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.TextScaled = true
+	label.TextWrapped = true
+	label.Font = Enum.Font.SourceSansBold
+	label.Visible = true
+	
+	addBool(label, "DefaultColor", true)
     
 	local invert = buttonModel:FindFirstChild("Invert")
 	if invert then invert:Destroy() end
@@ -53,10 +72,7 @@ local function transformButton(buttonModel)
 		end
 	end
 
-	local label = buttonModel:FindFirstChild("TimerLabel", true)
-	if label then label.Parent = buttonModel end
-
-	print("Successfully updated: " .. buttonModel.Name)
+	print("Successfully updated with TimerLabel: " .. buttonModel.Name)
 end
 
 for _, obj in ipairs(Selection:Get()) do

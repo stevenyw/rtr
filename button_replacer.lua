@@ -13,9 +13,6 @@ local function transformButton(buttonModel)
 	local pressed = buttonModel:FindFirstChild("Pressed")
 	if pressed then pressed.Parent = config end
 
-	local clientObject = buttonModel:FindFirstChild("ClientObject")
-	if clientObject then clientObject:Destroy() end
-
 	local function addConfigValue(className, name, val)
 		local existing = config:FindFirstChild(name)
 		if not existing then
@@ -84,7 +81,7 @@ local function transformButton(buttonModel)
 		dc.Parent = label
 	end
 
-	print("successfully transformed: " .. buttonModel.Name)
+	print("Successfully transformed: " .. buttonModel.Name)
 end
 
 for _, obj in ipairs(Selection:Get()) do

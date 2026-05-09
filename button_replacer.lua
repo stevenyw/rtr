@@ -13,69 +13,75 @@ local function transformButton(buttonModel)
 	local pressed = buttonModel:FindFirstChild("Pressed")
 	if pressed then pressed.Parent = config end
 
-	local function addBool(parent, name, val)
-		if not parent:FindFirstChild(name) then
-			local b = Instance.new("BoolValue")
-			b.Name = name
-			b.Value = val
-			b.Parent = parent
+	local function addConfigValue(className, name, val)
+		local existing = config:FindFirstChild(name)
+		if not existing then
+			local obj = Instance.new(className)
+			obj.Name = name
+			obj.Value = val
+			obj.Parent = config
+			return obj
+		end
+		return existing
+	end
+
+	addConfigValue("BoolValue", "ColorSpecific", false)
+	addConfigValue("BoolValue", "HideGUI", false)
+	addConfigValue("BoolValue", "SupportBalloons", true)
+	addConfigValue("BoolValue", "SupportPlayers", true)
+	
+	local isPushBox = (buttonModel.Name == "PushBoxButton")
+	addConfigValue("BoolValue", "SupportPushboxes", isPushBox)
+	
+	addConfigValue("BoolValue", "SupportTurrets", true)
+
+	local buttonPart = nil
+	for _, child in ipairs(buttonModel:GetChildren()) do
+		if child:IsA("BasePart") then
+			if child:FindFirstChild("Press") then
+				child.Name = "ButtonPart"
+				buttonPart = child
+				
+				local cos = child:FindFirstChild("ClientObjectScript")
+				if cos then cos:Destroy() end
+			end
 		end
 	end
 
-	addBool(config, "ColorSpecific", false)
-	addBool(config, "HideGUI", false)
-	addBool(config, "SupportBalloons", true)
-	addBool(config, "SupportPlayers", true)
-	addBool(config, "SupportPushboxes", true)
-	addBool(config, "SupportTurrets", true)
-
-	for _, descendant in ipairs(buttonModel:GetDescendants()) do
-		if descendant:IsA("BasePart") and descendant:FindFirstChildOfClass("Decal") then
-			descendant.Name = "ButtonPart"
-			descendant.Parent = buttonModel 
-
-			local oldScript = descendant:FindFirstChild("ClientObjectScript")
-			if oldScript then oldScript:Destroy() end
-
-			local doNotColor = descendant:FindFirstChild("DoNotColor")
-			if doNotColor then doNotColor:Destroy() end
+	local existingInvert = buttonModel:FindFirstChild("Invert")
+	if existingInvert and existingInvert:IsA("BoolValue") then
+		if buttonPart then
+			local newInvert = Instance.new("BoolValue")
+			newInvert.Name = "Invert"
+			newInvert.Value = true
+			newInvert.Parent = buttonPart
 		end
+		existingInvert:Destroy() 
 	end
 
-	-- TIMERLABEL LOGIC: Find existing or CREATE new if missing
-	local label = buttonModel:FindFirstChild("TimerLabel", true) 
+	local label = buttonModel:FindFirstChild("TimerLabel") 
 	if not label then
 		label = Instance.new("TextLabel")
 		label.Name = "TimerLabel"
+		label.Parent = buttonModel
 	end
-	label.Parent = buttonModel
 
-	-- Set exact properties from your images
-	label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	label.BackgroundTransparency = 1
-	label.BorderSizePixel = 1
-	label.BorderColor3 = Color3.fromRGB(27, 42, 53)
 	label.Size = UDim2.new(1, 0, 1, 0)
 	label.Position = UDim2.new(0, 0, 0, 0)
 	label.Text = "Label"
 	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	label.TextScaled = true
-	label.TextWrapped = true
 	label.Font = Enum.Font.SourceSansBold
-	label.Visible = true
-
-	addBool(label, "DefaultColor", true)
-
-	local invert = buttonModel:FindFirstChild("Invert")
-	if invert then invert:Destroy() end
-
-	for _, child in ipairs(buttonModel:GetChildren()) do
-		if child:IsA("BasePart") and child.Name == "Part" and #child:GetChildren() == 0 then
-			child:Destroy()
-		end
+	
+	if not label:FindFirstChild("DefaultColor") then
+		local dc = Instance.new("BoolValue")
+		dc.Name = "DefaultColor"
+		dc.Value = true
+		dc.Parent = label
 	end
 
-	print("Successfully updated with TimerLabel: " .. buttonModel.Name)
+	print("successfully transformed: " .. buttonModel.Name)
 end
 
 for _, obj in ipairs(Selection:Get()) do
